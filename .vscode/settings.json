@@ -10,6 +10,10 @@
     "functional": "c",
     "tuple": "c",
     "type_traits": "c",
-    "utility": "c"
+    "utility": "c",
+    "smartconfig_wifi.h": "c",
+    "wifi.h": "c",
+    "app_version.h": "c",
+    "mqtt_pro.h": "c"
   }
 }

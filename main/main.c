@@ -36,12 +36,13 @@ extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
 // add 
 #include "esp_sntp.h"
-#include "wifi.h"
+// #include "wifi.h"
 #include "mqtt_pro.h"
 #include "cJSON.h"
 #include "app_version.h"
 #include "freertos/event_groups.h"
 // #include "error_code.h"
+#include "smartconfig_wifi.h"
 
 #define HASH_LEN 32
 #define CATBOX_TX_COM_TOPIC "home/myAwtrix_TX"
@@ -256,25 +257,6 @@ static void get_sha256_of_partitions(void)
     print_sha256(sha_256, "SHA-256 for current firmware: ");
 }
 
-//wifi事件处理
-void event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data)
-{
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        esp_wifi_connect();
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        
-        esp_wifi_get_mac(ESP_IF_WIFI_AP, runInfo.macaddr);
-        ESP_LOGI(TAG, "macaddr:%02X:%02X:%02X:%02X:%02X:%02X", runInfo.macaddr[0],runInfo.macaddr[1],runInfo.macaddr[2],runInfo.macaddr[3],runInfo.macaddr[4],runInfo.macaddr[5]);
-
-        xEventGroupSetBits(runInfo.wifi_event_group, runInfo.CONNECTED_BIT);
-    }
-}
-
 void time_sync_notification_cb(struct timeval *tv)
 {
     static int first_in = 0;
@@ -319,7 +301,6 @@ static int mqtt_send_err(esp_mqtt_client_handle_t c, int errCode)
 void mqtt_event_data_pro(esp_mqtt_event_handle_t event)
 {
     char msg[512] = {0};
-    int ret = -1;
 
     cJSON *value = NULL;
 
@@ -444,6 +425,8 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
 void app_main(void)
 {
 
+    
+
     get_sha256_of_partitions();
 
     memset(&runInfo, 0, sizeof(runInfo));
@@ -475,8 +458,7 @@ void app_main(void)
         nvs_close(my_handle);
     }
     
-    wifi_init(event_handler, MY_WIFI_SSID, MY_WIFI_PASSWORD);
-    xEventGroupWaitBits(runInfo.wifi_event_group, runInfo.CONNECTED_BIT, false, true, portMAX_DELAY);
+    smartconfig_app_main();
 
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setservername(0, "time2.cloud.tencent.com");
