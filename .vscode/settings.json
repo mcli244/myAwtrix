@@ -1,0 +1,15 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.flashType": "UART",
+  "idf.portWin": "COM13",
+  "idf.adapterTargetName": "esp32s3",
+  "files.associations": {
+    "error_code.h": "c",
+    "ratio": "c",
+    "array": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c"
+  }
+}
