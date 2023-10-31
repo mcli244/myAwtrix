@@ -24,9 +24,8 @@
 #include "nvs_flash.h"
 #include "protocol_examples_common.h"
 #include <sys/socket.h>
-#if CONFIG_EXAMPLE_CONNECT_WIFI
 #include "esp_wifi.h"
-#endif
+
 
 static const char *TAG = "simple_ota_example";
 extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
@@ -36,13 +35,12 @@ extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
 // add 
 #include "esp_sntp.h"
-// #include "wifi.h"
 #include "mqtt_pro.h"
 #include "cJSON.h"
 #include "app_version.h"
 #include "freertos/event_groups.h"
-// #include "error_code.h"
 #include "smartconfig_wifi.h"
+#include "driver/gpio.h"
 
 #define HASH_LEN 32
 #define CATBOX_TX_COM_TOPIC "home/myAwtrix_TX"
@@ -421,17 +419,36 @@ void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event
     }
 }
 
+void wifi_clear_check(void)
+{
+    int cnt = 0;
+    gpio_reset_pin(5);
+    gpio_set_direction(5, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(5, GPIO_PULLUP_ONLY);
+
+    do{
+        cnt++;
+        vTaskDelay(pdMS_TO_TICKS(100));
+        if(cnt >= 30)
+        {
+            ESP_LOGW(TAG, "esp_wifi_restore.. ");
+            // Initialize NVS
+            esp_err_t err = nvs_flash_init();
+            if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+                ESP_ERROR_CHECK(nvs_flash_erase());
+                err = nvs_flash_init();
+            }
+            ESP_ERROR_CHECK( err );
+            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
+            ESP_ERROR_CHECK(esp_wifi_restore());
+            break;
+        }
+    }while(0 == gpio_get_level(5));
+}
 
 void app_main(void)
 {
-
-    
-
-    get_sha256_of_partitions();
-
-    memset(&runInfo, 0, sizeof(runInfo));
-    runInfo.CONNECTED_BIT = BIT0;
-    runInfo.wifi_event_group = xEventGroupCreate();
 
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
@@ -440,8 +457,7 @@ void app_main(void)
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK( err );
-
-    // Open
+     // Open
     nvs_handle_t my_handle;
     err = nvs_open("runInfo", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
@@ -457,7 +473,14 @@ void app_main(void)
         // err = nvs_get_u32(my_handle, "fanRunCnt", &runInfo.fanRunCnt);
         nvs_close(my_handle);
     }
-    
+
+    get_sha256_of_partitions();
+
+    memset(&runInfo, 0, sizeof(runInfo));
+    runInfo.CONNECTED_BIT = BIT0;
+    runInfo.wifi_event_group = xEventGroupCreate();
+
+    wifi_clear_check();
     smartconfig_app_main();
 
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
@@ -483,7 +506,7 @@ void app_main(void)
     // xTaskCreate(&simple_ota_example_task, "ota_example_task", 8192, NULL, 5, NULL);
     while(1)
     {
-        ESP_LOGI(TAG, "mimi..");
+        ESP_LOGI(TAG, "mimi.. ");
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
