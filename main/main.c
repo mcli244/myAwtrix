@@ -41,6 +41,7 @@ extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 #include "freertos/event_groups.h"
 #include "smartconfig_wifi.h"
 #include "driver/gpio.h"
+#include "ws2812.h"
 
 #define HASH_LEN 32
 #define CATBOX_TX_COM_TOPIC "home/myAwtrix_TX"
@@ -447,6 +448,34 @@ void wifi_clear_check(void)
     }while(0 == gpio_get_level(5));
 }
 
+void ws2812_task(void *pvParameter)
+{
+    uint8_t red = 0;
+    uint8_t green = 0;
+    uint8_t blue = 0;
+    uint16_t hue = 0;
+    uint16_t start_rgb = 0;
+    int j = 0;
+    int cnt = 0;
+    ws2812_init(10, 32, 8);
+    
+    while(1)
+    {
+        // hue ++;
+        // if(hue > 100)  hue = 0;
+        // ws2812_hsv2rgb(hue, 100, 100, &red, &green, &blue);
+        blue++;
+        ws2812_fill(blue);
+        ws2812_refrsh();
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        ws2812_fill(0);
+        ws2812_refrsh();
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+    }
+}
+
 void app_main(void)
 {
 
@@ -503,10 +532,14 @@ void app_main(void)
 
     esp_ota_mark_app_valid_cancel_rollback();   // 程序运行到这里，标记程序运行成功
 
-    // xTaskCreate(&simple_ota_example_task, "ota_example_task", 8192, NULL, 5, NULL);
+    xTaskCreate(&ws2812_task, "ws2812_task", 8192, NULL, 5, NULL);
+
+    
+
     while(1)
     {
         ESP_LOGI(TAG, "mimi.. ");
         vTaskDelay(3000 / portTICK_PERIOD_MS);
+        
     }
 }
