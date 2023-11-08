@@ -448,44 +448,97 @@ void wifi_clear_check(void)
     }while(0 == gpio_get_level(5));
 }
 
+// 顺向 阴码 逐行式
+uint8_t number_3x5[][5]={
+{0xE0,0xA0,0xA0,0xA0,0xE0},/*"未命名文件",0*/
+{0x40,0xC0,0x40,0x40,0xE0},/*"未命名文件",1*/
+{0xE0,0x20,0xE0,0x80,0xE0},/*"未命名文件",2*/
+{0xE0,0x20,0xE0,0x20,0xE0},/*"未命名文件",3*/
+{0xA0,0xA0,0xE0,0x20,0x20},/*"未命名文件",4*/
+{0xE0,0x80,0xE0,0x20,0xE0},/*"未命名文件",5*/
+{0xE0,0x80,0xE0,0xA0,0xE0},/*"未命名文件",6*/
+{0xE0,0x20,0x20,0x20,0x20},/*"未命名文件",7*/
+{0xE0,0xA0,0xE0,0xA0,0xE0},/*"未命名文件",8*/
+{0xE0,0xA0,0xE0,0x20,0xE0},/*"未命名文件",0*/
+};
+
+void disp_time_week(uint8_t hour, uint8_t min, uint8_t sec, uint8_t week)
+{
+    TCOLOR color = 0;
+    // TCOLOR clock_color = 0x0FAAD1;
+    // TCOLOR week_color = 0x00B350;
+    // TCOLOR week_bg_color = 0xDE1D5A;
+    TCOLOR clock_color = 0x042a33;
+    TCOLOR week_color = 0x003317;
+    TCOLOR week_bg_color = 0x330715;
+
+    GUI_GetDispColor(&color);
+
+    GUI_SetColor(clock_color, 0);
+    GUI_LoadPic(2, 1, &number_3x5[hour/10][0], 3, 5);
+    GUI_LoadPic(6, 1, &number_3x5[hour%10][0], 3, 5);
+
+    GUI_Point(10, 2, clock_color);
+    GUI_Point(10, 4, clock_color);
+
+    GUI_LoadPic(12, 1, &number_3x5[min/10][0], 3, 5);
+    GUI_LoadPic(16, 1, &number_3x5[min%10][0], 3, 5);
+
+    GUI_Point(20, 2, clock_color);
+    GUI_Point(20, 4, clock_color);
+
+    GUI_LoadPic(22, 1, &number_3x5[sec/10][0], 3, 5);
+    GUI_LoadPic(26, 1, &number_3x5[sec%10][0], 3, 5);
+
+    // week
+    for(int i=0; i<7; i++)
+    {
+        if(week - 1 == i)
+            GUI_HLine(i*4 + 2, 7, i*4 + 4, week_color);
+        else
+            GUI_HLine(i*4 + 2, 7, i*4 + 4, week_bg_color);
+    }
+        
+    GUI_SetColor(color, 0);
+}
+
 void ws2812_task(void *pvParameter)
 {
-    uint8_t red = 0;
-    uint8_t green = 0;
-    uint8_t blue = 0;
-    uint16_t hue = 0;
-    uint16_t start_rgb = 0;
-    int j = 0;
-    int cnt = 0;
-    // ws2812_init(10, 32, 8);
+    uint8_t hour,min,sec,week;
+
+    hour = 12;
+    min = 34;
+    sec = 56;
+    week = 3;
 
     GUI_Initialize();
     GUI_SetColor(0x00ff00, 0);
     GUI_PutString(0, 0, "Test1234");
     GUI_Refresh();
     int i = 0;
-    int dir = 0;
+    time_t timer0 = 0;
+    time_t timer_bak = 0xff;
     while(1)
     {
-        // hue ++;
-        // if(hue > 100)  hue = 0;
-        // ws2812_hsv2rgb(hue, 100, 100, &red, &green, &blue);
-        // blue++;
-        // ws2812_fill(blue);
-        // ws2812_refrsh();
-        // vTaskDelay(pdMS_TO_TICKS(10));
+	    timer0 = time(NULL);
+        if(timer0 != timer_bak)
+        {
+            timer_bak = timer0;
+            struct tm* plocaltime = localtime(&timer0);
 
-        // ws2812_fill(0);
-        // ws2812_refrsh();
-        
-        vTaskDelay(pdMS_TO_TICKS(300));
+            GUI_ClearSCR();
+            disp_time_week(plocaltime->tm_hour, plocaltime->tm_min, plocaltime->tm_sec, plocaltime->tm_wday);
+            GUI_Refresh();
 
+        }
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 
 void app_main(void)
 {
 
+#if 1
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -539,6 +592,7 @@ void app_main(void)
 
     esp_ota_mark_app_valid_cancel_rollback();   // 程序运行到这里，标记程序运行成功
 
+#endif
     xTaskCreate(&ws2812_task, "ws2812_task", 8192, NULL, 5, NULL);
 
     

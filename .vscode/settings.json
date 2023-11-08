@@ -37,6 +37,9 @@
     "loadbit.h": "c",
     "spline.h": "c",
     "gui_stockc.h": "c",
-    "font24_32.h": "c"
+    "font24_32.h": "c",
+    "chrono": "c",
+    "random": "c",
+    "limits": "c"
   }
 }
