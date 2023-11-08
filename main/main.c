@@ -41,7 +41,7 @@ extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 #include "freertos/event_groups.h"
 #include "smartconfig_wifi.h"
 #include "driver/gpio.h"
-#include "ws2812.h"
+#include "zlg_gui.h"
 
 #define HASH_LEN 32
 #define CATBOX_TX_COM_TOPIC "home/myAwtrix_TX"
@@ -457,21 +457,28 @@ void ws2812_task(void *pvParameter)
     uint16_t start_rgb = 0;
     int j = 0;
     int cnt = 0;
-    ws2812_init(10, 32, 8);
-    
+    // ws2812_init(10, 32, 8);
+
+    GUI_Initialize();
+    GUI_SetColor(0x00ff00, 0);
+    GUI_PutString(0, 0, "Test1234");
+    GUI_Refresh();
+    int i = 0;
+    int dir = 0;
     while(1)
     {
         // hue ++;
         // if(hue > 100)  hue = 0;
         // ws2812_hsv2rgb(hue, 100, 100, &red, &green, &blue);
-        blue++;
-        ws2812_fill(blue);
-        ws2812_refrsh();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // blue++;
+        // ws2812_fill(blue);
+        // ws2812_refrsh();
+        // vTaskDelay(pdMS_TO_TICKS(10));
 
-        ws2812_fill(0);
-        ws2812_refrsh();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // ws2812_fill(0);
+        // ws2812_refrsh();
+        
+        vTaskDelay(pdMS_TO_TICKS(300));
 
     }
 }

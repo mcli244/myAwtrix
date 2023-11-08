@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include "driver/rmt_tx.h"
 #include "led_strip_encoder.h"
+#include "my_ws2812.h"
 
 
 #define RMT_LED_STRIP_RESOLUTION_HZ 10000000 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
@@ -167,7 +168,7 @@ void ws2812_fill(uint32_t color)
     }
 }
 
-void ws2812_refrsh(void)
+void ws2812_refresh(void)
 {
     if(!g_led.initialized) return;
     rmt_transmit_config_t tx_config = {
