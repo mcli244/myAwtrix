@@ -14,7 +14,6 @@ extern  uint8 const  DCB2HEX_TAB[8];
 extern  TCOLOR	disp_color;
 extern  TCOLOR	back_color;
 
-
 /****************************************************************************
 * 名称：GUI_SetColor()
 * 功能：设置显示色及背景色。用于ASCII字符显示及汉字显示。
@@ -55,5 +54,22 @@ extern  void  GUI_GetDispColor(TCOLOR  *bakc);
 ****************************************************************************/
 extern  void  GUI_ExchangeColor(void);
 
+/****************************************************************************
+* 名称：GUI_SetBrightNess()
+* 功能：设置全局亮度
+* 入口参数：brightness 亮度0~255
+* 出口参数：无
+* 说明：
+****************************************************************************/
+extern  void  GUI_SetBrightNess(uint8_t brightness);
+
+/****************************************************************************
+* 名称：GUI_GetBrightNess()
+* 功能：获取全局亮度
+* 入口参数：brightness 亮度0~255
+* 出口参数：无
+* 说明：
+****************************************************************************/
+extern  void  GUI_GetBrightNess(uint8_t *brightness);
 
 #endif

@@ -50,5 +50,7 @@
 /* 颜色转换 */
 #define  CONVERTCOLOR_EN		1
 
+/*全局亮度调节， 使能后再GUI_Refresh时，先将显存里面的数据转成hsv并改变到指定亮度*/
+#define GUI_BRIGHTNESS_EN       1
 
 #endif

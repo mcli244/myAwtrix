@@ -138,7 +138,20 @@ void  GUI_RLine(uint16 x0, uint16 y0, uint16 y1, TCOLOR color)
 ****************************************************************************/
 void  GUI_Refresh(void)
 {
+#if GUI_BRIGHTNESS_EN == 1
+    
+#endif
 	ws2812_refresh();
+}
+
+void GUI_SetBrightness(uint8_t brightness)
+{
+	ws2812_set_brightness(brightness);
+}
+
+uint8_t GUI_GetBrightness(void)
+{
+	return ws2812_get_brightness();
 }
 
 

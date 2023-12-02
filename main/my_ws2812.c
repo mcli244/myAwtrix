@@ -10,6 +10,7 @@
 #include "driver/rmt_tx.h"
 #include "led_strip_encoder.h"
 #include "my_ws2812.h"
+#include "hsv2rgb.h"
 
 
 #define RMT_LED_STRIP_RESOLUTION_HZ 10000000 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
@@ -36,7 +37,7 @@ struct led_info
 };
 
 struct led_info g_led;
-
+static uint8_t g_brightness = 100;
 
 /**
  * @brief Simple helper function, converting HSV color space to RGB color space
@@ -157,6 +158,15 @@ void ws2812_darw_point(int x, int y, uint32_t color)
     g_led.led_strip_pixels[(x*8 + y)*3 + 2] = color&0xff;
 }
 
+void ws2812_read_point(int x, int y, uint32_t *color)
+{
+    if(!g_led.initialized) return;
+    // GRB
+    *color = ((g_led.led_strip_pixels[(x*8 + y)*3 + 1] & 0xff) << 16) 
+            | ((g_led.led_strip_pixels[(x*8 + y)*3 + 0] & 0xff) << 8) 
+            | (g_led.led_strip_pixels[(x*8 + y)*3 + 2] & 0xff);
+}
+
 void ws2812_fill(uint32_t color)
 {
     if(!g_led.initialized) return;
@@ -168,12 +178,49 @@ void ws2812_fill(uint32_t color)
     }
 }
 
+// 将显存中的数据，全部转到hsv,然后设置亮度 0~100
+void _ws2812_brightness(uint8_t brightness)
+{
+    if(!g_led.initialized) return;
+
+    color_hsv_t tmp_hsv;
+    color_rgb_t rgb;
+    float _brightness = (float)brightness/100;
+    for(int i=0; i<g_led.led_num; i++)
+    {
+        rgb.g = g_led.led_strip_pixels[i* 3 + 0];
+        rgb.r = g_led.led_strip_pixels[i* 3 + 1];
+        rgb.b = g_led.led_strip_pixels[i* 3 + 2];
+        
+        if((rgb.g | rgb.r | rgb.b) == 0) continue;
+        rgb2hsv(&rgb, &tmp_hsv);
+        tmp_hsv.v = _brightness;
+        hsv2rgb(&tmp_hsv, &rgb);
+
+        g_led.led_strip_pixels[i* 3 + 0] = rgb.g;
+        g_led.led_strip_pixels[i* 3 + 1] = rgb.r;
+        g_led.led_strip_pixels[i* 3 + 2] = rgb.b;
+    }
+}
+
+void ws2812_set_brightness(uint8_t brightness)
+{
+    if(brightness > 100) brightness = 100;
+    g_brightness = brightness;
+}
+
+uint8_t ws2812_get_brightness(void)
+{
+    return g_brightness;
+}
+
 void ws2812_refresh(void)
 {
     if(!g_led.initialized) return;
     rmt_transmit_config_t tx_config = {
             .loop_count = 0, // no transfer loop
         };
+    if(g_brightness != 100) _ws2812_brightness(g_brightness);
     ESP_ERROR_CHECK(rmt_transmit(g_led.led_chan, g_led.led_encoder, g_led.led_strip_pixels, g_led.led_strip_pixels_bytes, &tx_config));
     ESP_ERROR_CHECK(rmt_tx_wait_all_done(g_led.led_chan, portMAX_DELAY));
 }

@@ -107,4 +107,7 @@ extern void  GUI_RLine(uint16 x0, uint16 y0, uint16 y1, TCOLOR color);
 ****************************************************************************/
 extern void  GUI_Refresh(void);
 
+
+extern uint8_t GUI_GetBrightness(void);
+extern void GUI_SetBrightness(uint8_t brightness);
 #endif

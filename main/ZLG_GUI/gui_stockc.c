@@ -18,6 +18,7 @@ uint8 const  DCB2HEX_TAB[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 /* 定义前景色及背景色变量，用于ASCII码、汉字、窗口、单色位图显示 */
 TCOLOR  disp_color;
 TCOLOR	back_color;
+static uint8_t g_brightness = 80;
 
 /****************************************************************************
 * 名称：GUI_SetColor()
@@ -70,6 +71,33 @@ void  GUI_ExchangeColor(void)
    GUI_CopyColor(&bakc, disp_color);
    GUI_CopyColor(&disp_color, back_color);
    GUI_CopyColor(&back_color, bakc);
+}
+
+#endif
+
+#if GUI_BRIGHTNESS_EN == 1
+/****************************************************************************
+* 名称：GUI_SetBrightNess()
+* 功能：设置全局亮度
+* 入口参数：brightness 亮度0~255
+* 出口参数：无
+* 说明：
+****************************************************************************/
+void  GUI_SetBrightNess(uint8_t brightness)
+{
+   g_brightness = brightness;
+}
+
+/****************************************************************************
+* 名称：GUI_GetBrightNess()
+* 功能：获取全局亮度
+* 入口参数：brightness 亮度0~255
+* 出口参数：无
+* 说明：
+****************************************************************************/
+void  GUI_GetBrightNess(uint8_t *brightness)
+{
+   *brightness = g_brightness;
 }
 
 #endif

@@ -502,6 +502,76 @@ void disp_time_week(uint8_t hour, uint8_t min, uint8_t sec, uint8_t week)
     GUI_SetColor(color, 0);
 }
 
+
+#include "pic.h"
+// 显示一个8x8的图片+时间和周末
+void disp_time_week_pic(uint8_t hour, uint8_t min, uint8_t sec, uint8_t week)
+{
+    TCOLOR color = 0;
+    TCOLOR clock_color = 0x042a33;
+    TCOLOR week_color = 0x003317;
+    TCOLOR week_bg_color = 0x330715;
+    static uint8_t sec_bak = 0;
+    static uint8_t state = 0;
+    static uint8_t cnt = 0;
+    static uint8_t brightness = 100;
+
+    GUI_GetDispColor(&color);
+
+    if(cnt++ > 3) 
+    {
+        cnt = 0;
+        state ++;
+        if(state > 5 )  state = 0;
+        
+        
+    }
+    
+    switch (state)
+    {
+    case 0: GUI_LoadPicRGB(0, 0, gImage_sun, 8, 8); break;
+    case 1: GUI_LoadPicRGB(0, 0, gImage_sun2cloudy, 8, 8); break;
+    case 2: GUI_LoadPicRGB(0, 0, gImage_rain_s, 8, 8); break;
+    case 3: GUI_LoadPicRGB(0, 0, gImage_rain_m, 8, 8); break;
+    case 4: GUI_LoadPicRGB(0, 0, gImage_rain_l, 8, 8); break;
+    case 5: GUI_LoadPicRGB(0, 0, gImage_rain_flash, 8, 8); break;
+    default:
+        break;
+    }
+    
+
+    GUI_SetColor(clock_color, 0);
+    GUI_LoadPic(11, 1, &number_3x5[hour/10][0], 3, 5);
+    GUI_LoadPic(15, 1, &number_3x5[hour%10][0], 3, 5);
+
+    sec_bak = !sec_bak;
+    if(sec_bak)
+    {
+        GUI_Point(19, 2, clock_color);
+        GUI_Point(19, 4, clock_color);
+    }
+    else
+    {
+        GUI_Point(19, 2, 0);
+        GUI_Point(19, 4, 0);
+    }
+    
+
+    GUI_LoadPic(21, 1, &number_3x5[min/10][0], 3, 5);
+    GUI_LoadPic(25, 1, &number_3x5[min%10][0], 3, 5);
+
+    // week
+    for(int i=0; i<7; i++)
+    {
+        if(week - 1 == i)
+            GUI_HLine(i*3 + 10, 7, i*3 + 11, week_color);
+        else
+            GUI_HLine(i*3 + 10, 7, i*3 + 11, week_bg_color);
+    }
+        
+    GUI_SetColor(color, 0);
+}
+
 void ws2812_task(void *pvParameter)
 {
     uint8_t hour,min,sec,week;
@@ -513,6 +583,7 @@ void ws2812_task(void *pvParameter)
 
     GUI_Initialize();
     GUI_SetColor(0x00ff00, 0);
+    GUI_SetBrightness(10);  // 10的亮度， 显示disp_time_week_pic 大致在400mA左右
     GUI_PutString(0, 0, "Test1234");
     GUI_Refresh();
     int i = 0;
@@ -527,7 +598,8 @@ void ws2812_task(void *pvParameter)
             struct tm* plocaltime = localtime(&timer0);
 
             GUI_ClearSCR();
-            disp_time_week(plocaltime->tm_hour, plocaltime->tm_min, plocaltime->tm_sec, plocaltime->tm_wday);
+            disp_time_week_pic(plocaltime->tm_hour, plocaltime->tm_min, plocaltime->tm_sec, plocaltime->tm_wday);
+            //disp_time_week(plocaltime->tm_hour, plocaltime->tm_min, plocaltime->tm_sec, plocaltime->tm_wday);
             GUI_Refresh();
 
         }

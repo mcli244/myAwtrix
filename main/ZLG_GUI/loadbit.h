@@ -50,4 +50,5 @@ extern  void  GUI_LoadPic1(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 ln
 ****************************************************************************/
 extern  void  GUI_PutHZ(uint32 x, uint32 y, uint8 *dat, uint8 hno, uint8 lno);
 
+extern void  GUI_LoadPicRGB(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 lno);
 #endif

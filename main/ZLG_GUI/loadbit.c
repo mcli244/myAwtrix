@@ -100,6 +100,38 @@ void  GUI_LoadPic1(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 lno)
    GUI_ExchangeColor();
    
 }
+
+/****************************************************************************
+* 名称：GUI_LoadPic1()
+* 功能：输出单色图形数据，反相显示。
+* 入口参数： x		指定显示位置，x坐标
+*           y		指定显示位置，y坐标
+*           dat		要输出显示的数据。
+*           hno     要显示此行的点个数
+*           lno     要显示此列的点个数
+* 出口参数：无
+* 说明：操作失败原因是指定地址超出有效范围。
+****************************************************************************/
+// RGB 565
+void  GUI_LoadPicRGB(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 lno)
+{  
+   uint32 color = 0;
+   int index = 0;
+   int x0, y0;
+
+   for(y0=0; y0<lno; y0++)
+   {
+      for(x0=0; x0<hno; x0++)
+      {
+         color = 0;
+         color = dat[index] << 16 | dat[index + 1] << 8 | dat[index + 2];
+         GUI_Point(x0+x, y0+y, color);
+         index += 3;
+      }
+
+   }
+   
+}
 #endif
 
 
