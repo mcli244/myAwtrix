@@ -518,28 +518,32 @@ void disp_time_week_pic(uint8_t hour, uint8_t min, uint8_t sec, uint8_t week)
 
     GUI_GetDispColor(&color);
 
-    if(cnt++ > 3) 
+    if(cnt++ > 2) 
     {
         cnt = 0;
-        state ++;
-        if(state > 5 )  state = 0;
-        
-        
+        GUI_LoadPicRGB(0, 0, gImage_zy4, 8, 8);
+        srand(time(0));
+        state = rand() % 11;
     }
     
     switch (state)
     {
-    case 0: GUI_LoadPicRGB(0, 0, gImage_sun, 8, 8); break;
-    case 1: GUI_LoadPicRGB(0, 0, gImage_sun2cloudy, 8, 8); break;
-    case 2: GUI_LoadPicRGB(0, 0, gImage_rain_s, 8, 8); break;
-    case 3: GUI_LoadPicRGB(0, 0, gImage_rain_m, 8, 8); break;
-    case 4: GUI_LoadPicRGB(0, 0, gImage_rain_l, 8, 8); break;
-    case 5: GUI_LoadPicRGB(0, 0, gImage_rain_flash, 8, 8); break;
+    case 0: GUI_LoadPicRGB(0, 0, gImage_zy1, 8, 8); break;
+    case 1: GUI_LoadPicRGB(0, 0, gImage_zy2, 8, 8); break;
+    case 2: GUI_LoadPicRGB(0, 0, gImage_zy3, 8, 8); break; 
+    case 3: GUI_LoadPicRGB(0, 0, gImage_zy4, 8, 8); break;   
+    case 4: GUI_LoadPicRGB(0, 0, gImage_boom, 8, 8); break;   
+    case 5: GUI_LoadPicRGB(0, 0, gImage_sun, 8, 8); break;   
+    case 6: GUI_LoadPicRGB(0, 0, gImage_sun2cloudy, 8, 8); break;   
+    case 7: GUI_LoadPicRGB(0, 0, gImage_rain_s, 8, 8); break;   
+    case 8: GUI_LoadPicRGB(0, 0, gImage_rain_l, 8, 8); break;   
+    case 9: GUI_LoadPicRGB(0, 0, gImage_rain_m, 8, 8); break; 
+    case 10: GUI_LoadPicRGB(0, 0, gImage_rain_flash, 8, 8); break;
     default:
         break;
     }
     
-
+    
     GUI_SetColor(clock_color, 0);
     GUI_LoadPic(11, 1, &number_3x5[hour/10][0], 3, 5);
     GUI_LoadPic(15, 1, &number_3x5[hour%10][0], 3, 5);

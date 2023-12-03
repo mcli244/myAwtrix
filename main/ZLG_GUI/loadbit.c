@@ -112,7 +112,6 @@ void  GUI_LoadPic1(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 lno)
 * 出口参数：无
 * 说明：操作失败原因是指定地址超出有效范围。
 ****************************************************************************/
-// RGB 565
 void  GUI_LoadPicRGB(uint32 x, uint32 y, uint8 *dat, uint32 hno, uint32 lno)
 {  
    uint32 color = 0;
