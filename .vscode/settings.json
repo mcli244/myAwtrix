@@ -41,6 +41,11 @@
     "chrono": "c",
     "random": "c",
     "limits": "c",
-    "hsv2rgb.h": "c"
+    "hsv2rgb.h": "c",
+    "event_groups.h": "c",
+    "esp_wifi.h": "c",
+    "display.h": "c",
+    "gpio.h": "c",
+    "esp_http_client.h": "c"
   }
 }
